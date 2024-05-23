@@ -11,21 +11,36 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
 
+    #mo:
+    #    build:
+    #        context: ../middleOffice
+    #   ports:
+    #        - "8080:8080"
+    #    depends_on:
+    #        - config
+        #volumes:
+        #    - ../middleOffice:/app
+    #    environment:
+    #        - CONFIG_SERVER_URL=config:8888
+    #        - KC_HOST=host.docker.internal:8083
+    #        - SPRING_PROFILES_ACTIVE=docker
+    #    command:
+    #         /bin/bash -c "sleep 5 && java -jar /app.jar"
+    
     mo:
         build:
-            context: ../middleOffice
+            context: ../rust_rocket_mo
         ports:
-            - "8080:8080"
+            - "8000:8000"
         depends_on:
             - config
-        volumes:
-            - ../middleOffice:/app
+        #volumes:
+        #    - ../middleOffice:/app
         environment:
-            - CONFIG_SERVER_URL=config:8888
-            - KC_HOST=host.docker.internal:8083
+            - PROXY_URL=config:8888/config/rustmo/default/main/rustmo.toml
             - SPRING_PROFILES_ACTIVE=docker
         command:
-             /bin/bash -c "sleep 5 && java -jar /app.jar"
+            /bin/bash -c "sleep 5 && /rocket_mo/rocket_mo"
 
     referential:
         build:
@@ -47,6 +62,23 @@ services:
         command:
              /bin/bash -c "sleep 5 && java -jar /app.jar"
 
+    bfe:
+        build:
+            context: ../gobfe
+        ports:
+            - "8082:8082"
+        depends_on:
+            - config
+        #volumes:
+        #    - ../middleOffice:/app
+        environment:
+            - config_server_url=config:8888/config/rustmo/default/main/gobfe.json
+            - jwt_token_rsa_url=http://host.docker.internal/realms/ecommerce/protocol/openid-connect/certs
+            - local_nginx=host.docker.internal
+            - SPRING_PROFILES_ACTIVE=docker
+        command:
+            /bin/bash -c "sleep 5 && /go/bin/bfe"
+
     nginx:
         build:
             context: ../nginx
@@ -60,3 +92,5 @@ services:
             - referential=referential
             - config=config
             - auth=host.docker.internal
+            - vitemo=host.docker.internal
+            - bfe=bfe
