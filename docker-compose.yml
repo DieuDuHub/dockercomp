@@ -21,12 +21,13 @@ services:
         #volumes:
         #    - ../middleOffice:/app
     #    environment:
-    #        - CONFIG_SERVER_URL=config:8888
-    #        - KC_HOST=host.docker.internal:8083
-    #        - SPRING_PROFILES_ACTIVE=docker
+    #        - PROXY_URL=config:8888/config/rustmo/default/main/rustmo.toml
+    #       - SPRING_PROFILES_ACTIVE=docker
     #    command:
     #         /bin/bash -c "sleep 5 && java -jar /app.jar"
-    
+
+ #Comment mo block below   
+
     mo:
         build:
             context: ../rust_rocket_mo
@@ -38,6 +39,7 @@ services:
         #    - ../middleOffice:/app
         environment:
             - PROXY_URL=config:8888/config/rustmo/default/main/rustmo.toml
+            - DB_URL=host.docker.internal
             - SPRING_PROFILES_ACTIVE=docker
         command:
             /bin/bash -c "sleep 5 && /rocket_mo/rocket_mo"
